@@ -38,6 +38,22 @@ impl Board {
     pub fn draw(&self, ctx: &mut Context, res: &mut Resources) -> GameResult {
         graphics::draw(ctx, &res.board, ([0.0, 0.0],))
     }
+
+    pub fn black_n(&self) -> usize {
+        self.inner
+            .iter()
+            .flat_map(|row| row.iter())
+            .filter(|cell| **cell == Cell::Stone(Stone::Black))
+            .count()
+    }
+
+    pub fn white_n(&self) -> usize {
+        self.inner
+            .iter()
+            .flat_map(|row| row.iter())
+            .filter(|cell| **cell == Cell::Stone(Stone::White))
+            .count()
+    }
 }
 
 #[cfg(test)]
@@ -57,5 +73,17 @@ mod tests {
                 };
             }
         }
+    }
+
+    #[test]
+    fn get_number_of_black_stones() {
+        let board = Board::new();
+        assert_eq!(2, board.black_n());
+    }
+
+    #[test]
+    fn get_number_of_white_stones() {
+        let board = Board::new();
+        assert_eq!(2, board.white_n());
     }
 }
