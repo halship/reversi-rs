@@ -20,12 +20,12 @@ pub struct Board {
 
 impl Board {
     pub fn new() -> Self {
-        let mut inner = vec![vec![Cell::Empty; 9]; 9];
-        for i in 0..9 {
+        let mut inner = vec![vec![Cell::Empty; 10]; 10];
+        for i in 0..10 {
             inner[i][0] = Cell::Wall;
-            inner[i][8] = Cell::Wall;
+            inner[i][9] = Cell::Wall;
             inner[0][i] = Cell::Wall;
-            inner[8][i] = Cell::Wall;
+            inner[9][i] = Cell::Wall;
         }
         inner[4][4] = Cell::Stone(Stone::White);
         inner[5][5] = Cell::Stone(Stone::White);
@@ -66,7 +66,7 @@ mod tests {
         for (i, row) in board.inner.iter().enumerate() {
             for (j, cell) in row.iter().enumerate() {
                 match (i, j) {
-                    (0, _) | (8, _) | (_, 0) | (_, 8) => assert_eq!(Cell::Wall, *cell),
+                    (0, _) | (9, _) | (_, 0) | (_, 9) => assert_eq!(Cell::Wall, *cell),
                     (4, 4) | (5, 5) => assert_eq!(Cell::Stone(Stone::White), *cell),
                     (4, 5) | (5, 4) => assert_eq!(Cell::Stone(Stone::Black), *cell),
                     _ => assert_eq!(Cell::Empty, *cell),
