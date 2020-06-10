@@ -1,15 +1,22 @@
+mod resources;
+
 use ggez::conf::{WindowMode, WindowSetup};
 use ggez::event::{self, EventHandler};
 use ggez::{graphics, timer, Context, ContextBuilder, GameResult};
+use resources::Resources;
 
 const WINDOW_WIDTH: f32 = 640.0;
 const WINDOW_HEIGHT: f32 = 480.0;
 
-struct Game {}
+struct Game {
+    res: Resources,
+}
 
 impl Game {
-    fn new(_ctx: &mut Context) -> GameResult<Self> {
-        Ok(Self {})
+    fn new(ctx: &mut Context) -> GameResult<Self> {
+        let res = Resources::new(ctx)?;
+
+        Ok(Self { res })
     }
 }
 
@@ -29,6 +36,7 @@ fn main() -> GameResult {
     let (mut ctx, mut events_loop) = ContextBuilder::new("reversi", "halship")
         .window_setup(WindowSetup::default().title("リバーシ"))
         .window_mode(WindowMode::default().dimensions(WINDOW_WIDTH, WINDOW_HEIGHT))
+        .add_resource_path("./resources")
         .build()?;
     let mut game = Game::new(&mut ctx)?;
 
