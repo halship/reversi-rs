@@ -1,5 +1,7 @@
 use super::resources::Resources;
-use ggez::{graphics, Context, GameResult};
+use ggez::graphics::{self, DrawParam};
+use ggez::{Context, GameResult};
+use itertools::iproduct;
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum Cell {
@@ -36,7 +38,30 @@ impl Board {
     }
 
     pub fn draw(&self, ctx: &mut Context, res: &mut Resources) -> GameResult {
-        graphics::draw(ctx, &res.board, ([0.0, 0.0],))
+        graphics::draw(ctx, &res.board, ([0.0, 0.0],))?;
+
+        res.stones.clear();
+        for (i, j) in iproduct!(1..9, 1..9) {
+            let (x, y) = ((j - 1) as f32 * 50.0, (i - 1) as f32 * 50.0);
+            match self.inner[i][j] {
+                Cell::Stone(Stone::Black) => {
+                    res.stones.add(
+                        DrawParam::default()
+                            .dest([x, y])
+                            .src([0.0, 0.0, 0.5, 1.0].into()),
+                    );
+                }
+                Cell::Stone(Stone::White) => {
+                    res.stones.add(
+                        DrawParam::default()
+                            .dest([x, y])
+                            .src([0.5, 0.0, 0.5, 1.0].into()),
+                    );
+                }
+                _ => (),
+            };
+        }
+        graphics::draw(ctx, &res.stones, ([0.0, 0.0],))
     }
 
     pub fn black_n(&self) -> usize {
