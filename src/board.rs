@@ -21,10 +21,19 @@ pub enum Cell {
     Wall,
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub enum Stone {
     Black,
     White,
+}
+
+impl Stone {
+    fn reversed(&self) -> Stone {
+        match self {
+            Stone::Black => Stone::White,
+            Stone::White => Stone::Black,
+        }
+    }
 }
 
 pub struct Board {
@@ -90,6 +99,44 @@ impl Board {
             .filter(|cell| **cell == Cell::Stone(Stone::White))
             .count()
     }
+
+    pub fn reversible_n(&self, stone: Stone, i: usize, j: usize) -> usize {
+        let mut result = 0;
+
+        for (di, dj) in &DIRECTIONS {
+            result += self.reversible_n_sub(stone, i, j, *di, *dj);
+        }
+        result
+    }
+
+    fn reversible_n_sub(&self, stone: Stone, i: usize, j: usize, di: isize, dj: isize) -> usize {
+        let mut result = 0;
+        let (mut ti, mut tj) = (i, j);
+        let mut reversible = false;
+
+        loop {
+            ti = (ti as isize + di) as usize;
+            tj = (tj as isize + dj) as usize;
+
+            match &self.inner[ti][tj] {
+                Cell::Stone(st) => {
+                    if *st == stone.reversed() {
+                        result += 1
+                    } else {
+                        reversible = true;
+                        break;
+                    }
+                }
+                _ => break,
+            }
+        }
+
+        if reversible {
+            result
+        } else {
+            0
+        }
+    }
 }
 
 #[cfg(test)]
@@ -121,5 +168,12 @@ mod tests {
     fn get_number_of_white_stones() {
         let board = Board::new();
         assert_eq!(2, board.white_n());
+    }
+
+    #[test]
+    fn get_number_of_reversible() {
+        let board = Board::new();
+        assert_eq!(1, board.reversible_n(Stone::Black, 4, 3));
+        assert_eq!(0, board.reversible_n(Stone::White, 4, 3));
     }
 }
