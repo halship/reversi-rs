@@ -3,6 +3,17 @@ use ggez::graphics::{self, DrawParam};
 use ggez::{Context, GameResult};
 use itertools::iproduct;
 
+const DIRECTIONS: [(isize, isize); 8] = [
+    (-1, -1),
+    (-1, 0),
+    (-1, 1),
+    (0, -1),
+    (0, 1),
+    (1, -1),
+    (1, 0),
+    (1, 1),
+];
+
 #[derive(Debug, Clone, PartialEq)]
 pub enum Cell {
     Empty,
