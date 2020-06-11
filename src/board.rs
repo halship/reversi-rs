@@ -99,6 +99,12 @@ impl Board {
             .sum()
     }
 
+    pub fn set(&mut self, stone: Stone, i: usize, j: usize) {
+        for dir in Direction::all() {
+            self.set_sub(stone, i, j, dir);
+        }
+    }
+
     fn reversible_n_sub(&self, stone: Stone, i: usize, j: usize, dir: Direction) -> usize {
         let mut idx = (i, j);
         let mut n = 0;
@@ -242,6 +248,15 @@ mod tests {
     fn set_stone_sub() {
         let mut board = Board::new();
         board.set_sub(Stone::Black, 4, 3, Direction::Right);
+        assert_eq!(board.inner[4][3], Cell::Stone(Stone::Black));
+        assert_eq!(board.inner[4][4], Cell::Stone(Stone::Black));
+        assert_eq!(board.inner[4][5], Cell::Stone(Stone::Black));
+    }
+
+    #[test]
+    fn set_stone() {
+        let mut board = Board::new();
+        board.set(Stone::Black, 4, 3);
         assert_eq!(board.inner[4][3], Cell::Stone(Stone::Black));
         assert_eq!(board.inner[4][4], Cell::Stone(Stone::Black));
         assert_eq!(board.inner[4][5], Cell::Stone(Stone::Black));
