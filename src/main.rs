@@ -17,6 +17,7 @@ struct Game {
     player: Vec<Player>,
     tern: usize,
     info: Information,
+    is_finished: bool,
 }
 
 impl Game {
@@ -35,6 +36,7 @@ impl Game {
             player,
             tern: 0,
             info,
+            is_finished: false,
         })
     }
 }
@@ -42,16 +44,29 @@ impl Game {
 impl EventHandler for Game {
     fn update(&mut self, ctx: &mut Context) -> GameResult {
         while timer::check_update_time(ctx, 60) {
-            if !self.board.can_put(self.player[self.tern].stone()) {
-                self.tern = (self.tern + 1) % 2;
-            }
-            if self.player[self.tern].put_stone(&mut self.board) {
-                self.tern = (self.tern + 1) % 2;
-            }
+            if !self.is_finished {
+                if !self.board.can_put(self.player[self.tern].stone()) {
+                    self.tern = (self.tern + 1) % 2;
+                }
+                if self.player[self.tern].put_stone(&mut self.board) {
+                    self.tern = (self.tern + 1) % 2;
+                }
+                self.info.tern_stone = self.player[self.tern].stone();
+                self.info.black_n = self.board.black_n();
+                self.info.white_n = self.board.white_n();
 
-            self.info.tern_stone = self.player[self.tern].stone();
-            self.info.black_n = self.board.black_n();
-            self.info.white_n = self.board.white_n();
+                self.is_finished = self.board.is_finished();
+
+                if self.is_finished {
+                    if self.board.black_n() > self.board.white_n() {
+                        self.info.win_message = Some(format!("{}の勝ち", self.player[0].stone()));
+                    } else if self.board.black_n() < self.board.white_n() {
+                        self.info.win_message = Some(format!("{}の勝ち", self.player[1].stone()));
+                    } else {
+                        self.info.win_message = Some("引き分け".into());
+                    }
+                }
+            }
         }
         Ok(())
     }

@@ -6,6 +6,7 @@ pub struct Information {
     pub tern_stone: Stone,
     pub black_n: usize,
     pub white_n: usize,
+    pub win_message: Option<String>,
 }
 
 impl Information {
@@ -20,6 +21,15 @@ impl Information {
                 .font(font)
                 .scale(Scale::uniform(20.0)),
         );
+
+        if let Some(message) = &self.win_message {
+            text.add(
+                TextFragment::new(format!("\n\n{}！", message))
+                    .font(font)
+                    .scale(Scale::uniform(24.0)),
+            );
+        }
+
         graphics::draw(ctx, &text, ([410.0, 10.0],))
     }
 }
@@ -30,6 +40,7 @@ impl Default for Information {
             tern_stone: Stone::Black,
             black_n: 0,
             white_n: 0,
+            win_message: None,
         }
     }
 }
