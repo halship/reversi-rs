@@ -116,8 +116,26 @@ impl Board {
             }
         }
     }
+
+    fn set_sub(&mut self, stone: Stone, i: usize, j: usize, dir: Direction) {
+        if self.reversible_n_sub(stone, i, j, dir) == 0 {
+            return;
+        }
+        self.inner[i][j] = Cell::Stone(stone);
+        let mut idx = (i, j);
+        loop {
+            idx = dir.moved(idx.0, idx.1);
+            match &self.inner[idx.0][idx.1] {
+                Cell::Stone(st) if *st == stone.reversed() => {
+                    self.inner[idx.0][idx.1] = Cell::Stone(stone);
+                }
+                _ => break,
+            }
+        }
+    }
 }
 
+#[derive(Clone, Copy)]
 enum Direction {
     Up,
     Down,
@@ -218,5 +236,14 @@ mod tests {
         let board = Board::new();
         assert_eq!(1, board.reversible_n(Stone::Black, 4, 3));
         assert_eq!(0, board.reversible_n(Stone::White, 4, 3));
+    }
+
+    #[test]
+    fn set_stone_sub() {
+        let mut board = Board::new();
+        board.set_sub(Stone::Black, 4, 3, Direction::Right);
+        assert_eq!(board.inner[4][3], Cell::Stone(Stone::Black));
+        assert_eq!(board.inner[4][4], Cell::Stone(Stone::Black));
+        assert_eq!(board.inner[4][5], Cell::Stone(Stone::Black));
     }
 }
