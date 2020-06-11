@@ -2,6 +2,7 @@ use super::resources::Resources;
 use ggez::graphics::{self, DrawParam};
 use ggez::{Context, GameResult};
 use itertools::iproduct;
+use std::fmt;
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum Cell {
@@ -14,6 +15,15 @@ pub enum Cell {
 pub enum Stone {
     Black,
     White,
+}
+
+impl fmt::Display for Stone {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Stone::Black => write!(f, "黒"),
+            Stone::White => write!(f, "白"),
+        }
+    }
 }
 
 impl Stone {
