@@ -3,17 +3,6 @@ use ggez::graphics::{self, DrawParam};
 use ggez::{Context, GameResult};
 use itertools::iproduct;
 
-const DIRECTIONS: [(isize, isize); 8] = [
-    (-1, -1),
-    (-1, 0),
-    (-1, 1),
-    (0, -1),
-    (0, 1),
-    (1, -1),
-    (1, 0),
-    (1, 1),
-];
-
 #[derive(Debug, Clone, PartialEq)]
 pub enum Cell {
     Empty,
@@ -101,40 +90,69 @@ impl Board {
     }
 
     pub fn reversible_n(&self, stone: Stone, i: usize, j: usize) -> usize {
-        let mut result = 0;
-
-        for (di, dj) in &DIRECTIONS {
-            result += self.reversible_n_sub(stone, i, j, *di, *dj);
+        if self.inner[i][j] != Cell::Empty {
+            return 0;
         }
-        result
+        Direction::all()
+            .into_iter()
+            .map(|dir| self.reversible_n_sub(stone, i, j, dir))
+            .sum()
     }
 
-    fn reversible_n_sub(&self, stone: Stone, i: usize, j: usize, di: isize, dj: isize) -> usize {
-        let mut result = 0;
-        let (mut ti, mut tj) = (i, j);
-        let mut reversible = false;
-
+    fn reversible_n_sub(&self, stone: Stone, i: usize, j: usize, dir: Direction) -> usize {
+        let mut idx = (i, j);
+        let mut n = 0;
         loop {
-            ti = (ti as isize + di) as usize;
-            tj = (tj as isize + dj) as usize;
-
-            match &self.inner[ti][tj] {
+            idx = dir.moved(idx.0, idx.1);
+            match &self.inner[idx.0][idx.1] {
                 Cell::Stone(st) => {
                     if *st == stone.reversed() {
-                        result += 1
+                        n += 1;
                     } else {
-                        reversible = true;
-                        break;
+                        return n;
                     }
                 }
-                _ => break,
+                _ => return 0,
             }
         }
+    }
+}
 
-        if reversible {
-            result
-        } else {
-            0
+enum Direction {
+    Up,
+    Down,
+    Left,
+    Right,
+    LeftUp,
+    RightUp,
+    LeftDown,
+    RightDown,
+}
+
+impl Direction {
+    fn all() -> Vec<Direction> {
+        vec![
+            Direction::Up,
+            Direction::Down,
+            Direction::Left,
+            Direction::Right,
+            Direction::LeftUp,
+            Direction::RightUp,
+            Direction::LeftDown,
+            Direction::RightDown,
+        ]
+    }
+
+    fn moved(&self, i: usize, j: usize) -> (usize, usize) {
+        match self {
+            Direction::Left => (i, j - 1),
+            Direction::Right => (i, j + 1),
+            Direction::Up => (i - 1, j),
+            Direction::Down => (i + 1, j),
+            Direction::LeftUp => (i - 1, j - 1),
+            Direction::RightUp => (i - 1, j + 1),
+            Direction::LeftDown => (i + 1, j - 1),
+            Direction::RightDown => (i + 1, j + 1),
         }
     }
 }
@@ -159,6 +177,18 @@ mod tests {
     }
 
     #[test]
+    fn moved_direction() {
+        assert_eq!((2, 2), Direction::LeftUp.moved(3, 3));
+        assert_eq!((2, 3), Direction::Up.moved(3, 3));
+        assert_eq!((2, 4), Direction::RightUp.moved(3, 3));
+        assert_eq!((3, 2), Direction::Left.moved(3, 3));
+        assert_eq!((3, 4), Direction::Right.moved(3, 3));
+        assert_eq!((4, 2), Direction::LeftDown.moved(3, 3));
+        assert_eq!((4, 3), Direction::Down.moved(3, 3));
+        assert_eq!((4, 4), Direction::RightDown.moved(3, 3));
+    }
+
+    #[test]
     fn get_number_of_black_stones() {
         let board = Board::new();
         assert_eq!(2, board.black_n());
@@ -168,6 +198,19 @@ mod tests {
     fn get_number_of_white_stones() {
         let board = Board::new();
         assert_eq!(2, board.white_n());
+    }
+
+    #[test]
+    fn get_number_of_reversible_sub() {
+        let board = Board::new();
+        assert_eq!(
+            0,
+            board.reversible_n_sub(Stone::Black, 4, 3, Direction::Left)
+        );
+        assert_eq!(
+            1,
+            board.reversible_n_sub(Stone::Black, 4, 3, Direction::Right)
+        );
     }
 
     #[test]
