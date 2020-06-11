@@ -115,6 +115,10 @@ impl Board {
         }
     }
 
+    pub fn can_put(&self, stone: Stone) -> bool {
+        iproduct!(1..9, 1..9).any(|(i, j)| self.reversible_n(stone, i, j) != 0)
+    }
+
     fn reversible_n_sub(&self, stone: Stone, i: usize, j: usize, dir: Direction) -> usize {
         let mut idx = (i, j);
         let mut n = 0;
@@ -270,5 +274,19 @@ mod tests {
         assert_eq!(board.inner[4][3], Cell::Stone(Stone::Black));
         assert_eq!(board.inner[4][4], Cell::Stone(Stone::Black));
         assert_eq!(board.inner[4][5], Cell::Stone(Stone::Black));
+    }
+
+    #[test]
+    fn check_can_put() {
+        let mut board = Board::new();
+        assert!(board.can_put(Stone::Black));
+
+        board
+            .inner
+            .iter_mut()
+            .flat_map(|row| row.iter_mut())
+            .filter(|cell| **cell == Cell::Empty)
+            .for_each(|cell| *cell = Cell::Stone(Stone::Black));
+        assert!(!board.can_put(Stone::White));
     }
 }

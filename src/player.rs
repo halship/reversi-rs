@@ -59,8 +59,8 @@ mod tests {
             Player::Human {
                 idx: Some((i, j)), ..
             } => {
-                assert_eq!(4, i);
-                assert_eq!(2, j);
+                assert_eq!(5, i);
+                assert_eq!(3, j);
             }
             _ => (),
         }

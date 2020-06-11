@@ -42,6 +42,9 @@ impl Game {
 impl EventHandler for Game {
     fn update(&mut self, ctx: &mut Context) -> GameResult {
         while timer::check_update_time(ctx, 60) {
+            if !self.board.can_put(self.player[self.tern].stone()) {
+                self.tern = (self.tern + 1) % 2;
+            }
             if self.player[self.tern].put_stone(&mut self.board) {
                 self.tern = (self.tern + 1) % 2;
             }
