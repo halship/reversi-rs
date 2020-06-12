@@ -1,10 +1,14 @@
 use crate::board::{Board, Stone};
 use ggez::event::MouseButton;
+use itertools::iproduct;
 
 pub enum Player {
     Human {
         stone: Stone,
         idx: Option<(usize, usize)>,
+    },
+    Computer {
+        stone: Stone,
     },
 }
 
@@ -13,9 +17,14 @@ impl Player {
         Self::Human { stone, idx: None }
     }
 
+    pub fn new_computer(stone: Stone) -> Self {
+        Self::Computer { stone }
+    }
+
     pub fn stone(&self) -> Stone {
         match self {
             Player::Human { stone, .. } => *stone,
+            Player::Computer { stone } => *stone,
         }
     }
 
@@ -32,6 +41,7 @@ impl Player {
                     false
                 }
             }
+            Player::Computer { stone } => self.computer_put_stone(board, *stone),
             _ => false,
         }
     }
@@ -43,6 +53,18 @@ impl Player {
                     *idx = Some(((y / 50.0) as usize + 1, (x / 50.0) as usize + 1));
                 }
             }
+            _ => (),
+        }
+    }
+
+    fn computer_put_stone(&self, board: &mut Board, stone: Stone) -> bool {
+        let idx = iproduct!(1..9, 1..9).max_by_key(|(i, j)| board.reversible_n(stone, *i, *j));
+        match idx {
+            Some((i, j)) => {
+                board.set(stone, i, j);
+                true
+            }
+            None => false,
         }
     }
 }

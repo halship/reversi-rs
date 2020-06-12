@@ -26,7 +26,7 @@ impl Game {
         let board = Board::new();
         let player = vec![
             Player::new_human(Stone::Black),
-            Player::new_human(Stone::White),
+            Player::new_computer(Stone::White),
         ];
         let info = Information::default();
 
