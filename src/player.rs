@@ -9,6 +9,7 @@ pub enum Player {
     },
     Computer {
         stone: Stone,
+        count: i32,
     },
 }
 
@@ -18,17 +19,17 @@ impl Player {
     }
 
     pub fn new_computer(stone: Stone) -> Self {
-        Self::Computer { stone }
+        Self::Computer { stone, count: 30 }
     }
 
     pub fn stone(&self) -> Stone {
         match self {
             Player::Human { stone, .. } => *stone,
-            Player::Computer { stone } => *stone,
+            Player::Computer { stone, .. } => *stone,
         }
     }
 
-    pub fn put_stone(&self, board: &mut Board) -> bool {
+    pub fn put_stone(&mut self, board: &mut Board) -> bool {
         match self {
             Player::Human {
                 stone,
@@ -41,7 +42,19 @@ impl Player {
                     false
                 }
             }
-            Player::Computer { stone } => self.computer_put_stone(board, *stone),
+            Player::Computer { stone, count } => {
+                *count -= 1;
+                if *count == 0 {
+                    let (i, j) = iproduct!(1..9, 1..9)
+                        .max_by_key(|(i, j)| board.reversible_n(*stone, *i, *j))
+                        .unwrap();
+                    board.set(*stone, i, j);
+                    *count = 30;
+                    true
+                } else {
+                    false
+                }
+            }
             _ => false,
         }
     }
@@ -54,17 +67,6 @@ impl Player {
                 }
             }
             _ => (),
-        }
-    }
-
-    fn computer_put_stone(&self, board: &mut Board, stone: Stone) -> bool {
-        let idx = iproduct!(1..9, 1..9).max_by_key(|(i, j)| board.reversible_n(stone, *i, *j));
-        match idx {
-            Some((i, j)) => {
-                board.set(stone, i, j);
-                true
-            }
-            None => false,
         }
     }
 }
